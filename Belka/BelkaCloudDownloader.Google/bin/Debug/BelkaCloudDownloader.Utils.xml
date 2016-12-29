@@ -1,0 +1,886 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BelkaCloudDownloader.Utils</name>
+    </assembly>
+    <members>
+        <member name="T:BelkaCloudDownloader.Utils.CloudDownloaderException">
+            <summary>
+            General "something went bad" exception, root of a hierarchy of recoverable exceptions.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.CloudDownloaderException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.CloudDownloaderException"/> class.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.CloudDownloaderException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.CloudDownloaderException"/> class.
+            </summary>
+            <param name="message">Error message.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.CloudDownloaderException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.CloudDownloaderException"/> class.
+            </summary>
+            <param name="message">Error message.</param>
+            <param name="innerException">Inner exception.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.CloudDownloaderException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.CloudDownloaderException"/> class.
+            </summary>
+            <param name="info">Serialization info.</param>
+            <param name="context">Streaming context.</param>
+            <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or
+                <see cref="P:System.Exception.HResult" /> is zero (0). </exception>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.DownloaderGlobalLog">
+            <summary>
+            Factory for logger objects.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.DownloaderGlobalLog.Log">
+            <summary>
+            Gets or sets global logger. Should be used when no other log is available.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.LoggerAdapter">
+            <summary>
+            Implementation of <see cref="T:BelkaCloudDownloader.Utils.IIoLogger"/> interface using log4net.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.LoggerAdapter.log">
+            <summary>
+            Underlying log4net logger.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.LoggerAdapter.LogFile">
+            <summary>
+            Gets a file where log messages will be written.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.LoggerAdapter.IsTraceEnabled">
+            <summary>
+            Gets a value indicating whether trace messages are written to a log.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.Flush">
+            <summary>
+            Flushes log contents on disk. Does nothing since log4net does that for us.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.Trace(System.String)">
+            <summary>
+            Adds debug trace to the log.
+            </summary>
+            <param name="message">Message of the trace to be added.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.Trace(System.String,System.Object[])">
+            <summary>
+            Adds debug trace to the log.
+            </summary>
+            <param name="message">Message of the trace to be added.</param>
+            <param name="arguments">Additional arguments. Ignored in this implementation.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.LogMessage(System.String)">
+            <summary>
+            Adds message to the log.
+            </summary>
+            <param name="message">Message string to be added.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.LogMessage(System.String,System.Object[])">
+            <summary>
+            Adds message to the log.
+            </summary>
+            <param name="message">Message string to be added.</param>
+            <param name="arguments">Additional arguments. Ignored in this implementation.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.LogDebugMessage(System.String,System.Object[])">
+            <summary>
+            Adds message to the log when built in debug configuration.
+            </summary>
+            <param name="message">Message string to be added.</param>
+            <param name="arguments">Additional arguments. Ignored in this implementation.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.LogError(System.String,System.Exception,System.Object[])">
+            <summary>
+            Adds error info to the log.
+            </summary>
+            <param name="message">Message describing an error.</param>
+            <param name="e">Exception that caused an error.</param>
+            <param name="arguments">Additional arguments. Ignored in this implementation.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.LogError(System.String,System.Object[])">
+            <summary>
+            Adds error info to the log.
+            </summary>
+            <param name="message">Message describing an error.</param>
+            <param name="arguments">Additional arguments. Ignored in this implementation.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.LoggerAdapter.LogError(System.String,System.Exception)">
+            <summary>
+            Adds error info to the log.
+            </summary>
+            <param name="message">Message describing an error.</param>
+            <param name="e">Exception that caused an error.</param>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.AbstractDownloader">
+            <summary>
+            Abstract downloader, something that can get some information from a cloud, with logger, possibility to cancel
+            an operation and able to report progress and current status, possibly into other thread. It is basically a
+            task container that has a notion of global Status and distinquishes progress and estimation by overall and
+            current operation.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AbstractDownloader.status">
+            <summary>
+            Current global status of a download.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.#ctor(System.Threading.CancellationToken,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.AbstractDownloader"/> class.
+            </summary>
+            <param name="cancellationToken">Token by which downloading progress can be cancelled.</param>
+            <param name="guessEstimation">Starting estimation of complexity of an operation (expressed in abstract
+            work units). Will be automatically corrected when more information about tasks estimation becomes
+            available.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.AbstractDownloader"/> class. Supposed to be used as
+            sub-downloader, because it has no cancellation token and no status accumulator.
+            </summary>
+        </member>
+        <member name="E:BelkaCloudDownloader.Utils.AbstractDownloader.StatusChanged">
+            <summary>
+            Operation status as a string message.
+            </summary>
+        </member>
+        <member name="E:BelkaCloudDownloader.Utils.AbstractDownloader.CurrentOperationProgressChanged">
+            <summary>
+            Progress for current operation (for example, progress of downloading a file or getting meta-information).
+            </summary>
+        </member>
+        <member name="E:BelkaCloudDownloader.Utils.AbstractDownloader.CurrentOperationEstimationChanged">
+            <summary>
+            Sent when estimation of current operation is changed.
+            </summary>
+        </member>
+        <member name="E:BelkaCloudDownloader.Utils.AbstractDownloader.PreliminaryResultsReady">
+            <summary>
+            Sent when something is downloaded and ready to be shown to an user.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractDownloader.Status">
+            <summary>
+            Gets or sets global status of a downloader.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractDownloader.SubDownloaders">
+            <summary>
+            Gets a list of sub-downloaders for this downloader.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.AddSubDownloader(BelkaCloudDownloader.Utils.AbstractDownloader)">
+            <summary>
+            Registers another downloader as sub-downloader of this downloader, capable of doing part of the job,
+            reporting progress, status and current operation progress.
+            </summary>
+            <param name="subDownloader">Downloader to register as sub-downloader.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.Done">
+            <summary>
+            Marks downloading process as "Done", notifying everyone.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.Error">
+            <summary>
+            Marks downloading process state as unrecoverable error, notifying everyone.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.AddAsCurrentOperation(BelkaCloudDownloader.Utils.AbstractDownloader)">
+            <summary>
+            Adds sub-downloader as a current suboperation, so its progress will be returned as current operation
+            progress.
+            </summary>
+            <param name="subDownloader">Downloader to register as sub-downloader.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.EmitPreliminaryResultsReady(System.Object)">
+            <summary>
+            Helper that posts MetaInformationReady event into correct thread.
+            </summary>
+            <param name="results">Meta-information that can be displayed in GUI without need to wait when actual files
+                are downloaded.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.OnStatusChanged(System.Object,BelkaCloudDownloader.Utils.StatusChangedEventArgs)">
+            <summary>
+            Handler for StatusChanged event from one of subdownloaders.
+            </summary>
+            <param name="sender">Downloader that sent the event.</param>
+            <param name="args">Event arguments.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.OnCurrentOperationEstimationChanged(System.Object,BelkaCloudDownloader.Utils.EstimationChangedEventArgs)">
+            <summary>
+            Handler for CurrentOperationEstimationChanged event from one of subdownloaders.
+            </summary>
+            <param name="sender">Downloader that sent the event.</param>
+            <param name="args">Event arguments.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.OnCurrentOperationProgressChanged(System.Object,BelkaCloudDownloader.Utils.ProgressChangedEventArgs)">
+            <summary>
+            Handler for CurrentOperationProgressChanged event from one of subdownloaders.
+            </summary>
+            <param name="sender">Downloader that sent the event.</param>
+            <param name="args">Event arguments.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.EmitCurrentOperationProgressChanged(BelkaCloudDownloader.Utils.AbstractTask,System.String,System.Int32)">
+            <summary>
+            Helper that posts CurrentOperationProgressChanged event into correct thread.
+            </summary>
+            <param name="task">Operation which progress was changed.</param>
+            <param name="info">Human-readable information about operation to be displayed as a status in GUI.</param>
+            <param name="progress">Operation progress value (measured in abstract work units).</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.EmitCurrentOperationEstimationChanged(BelkaCloudDownloader.Utils.AbstractTask,System.Int32)">
+            <summary>
+            Helper that posts CurrentOperationEstimationChanged event into correct thread.
+            </summary>
+            <param name="task">Operation which estimation was changed.</param>
+            <param name="estimation">Operation estimation value (measured in abstract work units).</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.SetCurrentOperationEstimation(BelkaCloudDownloader.Utils.AbstractTask,System.Int32)">
+            <summary>
+            Sets the estimation of a current sub-task and notifies everyone.
+            </summary>
+            <param name="operation">Sub-task for which it is needed to set estimation.</param>
+            <param name="estimation">Estimation (in abstract work units) of a sub-task.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.SetCurrentOperationProgress(BelkaCloudDownloader.Utils.AbstractTask,System.String,System.Int32)">
+            <summary>
+            Sets the progress of a current sub-task and notifies everyone.
+            </summary>
+            <param name="operation">Sub-task for which it is needed to set estimation.</param>
+            <param name="info">Human-readable information about operation to be displayed as a status in GUI.</param>
+            <param name="progress">Current progress (in abstract work units) of a sub-task.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractDownloader.EmitStatusChanged(BelkaCloudDownloader.Utils.Status)">
+            <summary>
+            Helper that posts StatusChanged event into correct thread.
+            </summary>
+            <param name="statusCode">TaskStatus code.</param>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.AbstractTask">
+            <summary>
+            Abstract task that can be performed during downloading. Has estimation (expressed in abstract work units),
+            can update estimation, report progress, report status, can be cancelled. Can be used in multithreaded
+            context, but is not thread-safe (no simultaneous calls from multiple threads are allowed).
+            What it actually does is implemented in descendants.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AbstractTask.syncContext">
+            <summary>
+            Synchronization context of an object that created this task.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AbstractTask.estimation">
+            <summary>
+            Current estimation of a task, in abstract work units.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AbstractTask.progress">
+            <summary>
+            Current progress of a task, in abstract work units.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AbstractTask.log">
+            <summary>
+            Logger object used to output debug info.
+            </summary>
+        </member>
+        <member name="E:BelkaCloudDownloader.Utils.AbstractTask.ProgressChanged">
+            <summary>
+            Reports current progress change for a task.
+            </summary>
+        </member>
+        <member name="E:BelkaCloudDownloader.Utils.AbstractTask.EstimationChanged">
+            <summary>
+            Reports changes in an estimation of a task.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.TaskStatus">
+            <summary>
+            Gets current status of a task --- success, failure or if there were errors but some information
+            was downloaded anyway.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.Info">
+            <summary>
+            Gets or sets human-readable string about activity this task performs now. Will be sent with the progress
+            update if set.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.Estimation">
+            <summary>
+            Gets or sets current estimation of a task (measured in abstract work units).
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.Progress">
+            <summary>
+            Gets or sets current progress of a task (measured in abstract work units).
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.CancellationToken">
+            <summary>
+            Gets or sets token that can be used to abort downloading.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.StatusAccumulator">
+            <summary>
+            Gets or sets task status accumulator, to report all successfully downloaded pieces of information or
+            report errors.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.AbstractTask.Log">
+            <summary>
+            Gets or sets downloader activity logger.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractTask.Invoke(System.Action)">
+            <summary>
+            Invokes given delegate in a thread where downloader was created.
+            </summary>
+            <param name="action">Action to invoke.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractTask.FailureOccured(System.String,System.Exception)">
+            <summary>
+            Helper method that reports failure and logs error with exception.
+            </summary>
+            <param name="errorMessage">Message to add to a log.</param>
+            <param name="exception">Exception to log along the message.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractTask.UpdateLog(BelkaCloudDownloader.Utils.IIoLogger)">
+            <summary>
+            Virtual method that is called when Log property changes and shall be overriden to propagate log changing.
+            </summary>
+            <param name="logger">New logger object.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractTask.EmitProgressChanged">
+            <summary>
+            Helper that posts ProgressChanged event into correct thread.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AbstractTask.EmitEstimationChanged">
+            <summary>
+            Helper that posts EstimationChanged event into correct thread.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.AsyncHelper">
+            <summary>
+            Contains utility methods for working with async tasks.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AsyncHelper.ProcessInChunks``2(System.Collections.Generic.IList{``0},System.Func{``0,System.Threading.Tasks.Task{``1}},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Helper method that takes a list of some data and a function that creates async task for every data item,
+            and processes them in chunks to avoid launching too many tasks at once. Something like asynchronous "map" function.
+            </summary>
+            <param name="data">A list of file info structures to process.</param>
+            <param name="action">A function that returns a task that does something with every file.</param>
+            <param name="chunkSize">Number of tasks to be launched simultaneously.</param>
+            <param name="cancellationToken">Cancellation token that can be used to abort tasks.</param>
+            <typeparam name="TInput">A type of data to process.</typeparam>
+            <typeparam name="TResult">A type of return value of a task.</typeparam>
+            <returns>A list of processed data.</returns>
+            <exception cref="T:System.OperationCanceledException">The token has had cancellation requested.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AsyncHelper.ExecuteWithCooldown``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken,System.Int32)">
+            <summary>
+            Executes given asynchronous task and waits some time after so that total amount of time spent will be no less than
+            specified cooldown. Useful to fulfill server requirements like "no more than one request in a second". Task execution and
+            waiting are cancellable. Does not provide accurate resolution, up to 25 ms "misses" are possible.
+            </summary>
+            <typeparam name="TOutput">Type of result of a task.</typeparam>
+            <param name="task">A task to be executed. Must take <see cref="T:System.Threading.CancellationToken"/> to be able to be cancelled.</param>
+            <param name="token">Cancellation token allowing to cancel an operation or cooldown.</param>
+            <param name="cooldown">Required duration of operation, in milliseconds.</param>
+            <returns>Output of a task.</returns>
+            <exception cref="T:System.Exception">A "task" function throws an exception.</exception>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.AsyncSemaphore">
+            <summary>
+            Asynchronous semaphore (substitution for SemaphoreSlim from .NET 4.5), based on AsyncSemaphore by Stephen Toub
+            (http://blogs.msdn.com/b/pfxteam/archive/2012/02/12/10266983.aspx)
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AsyncSemaphore.Completed">
+            <summary>
+            Task that does nothing, but allows other task to continue.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AsyncSemaphore.waitingTasks">
+            <summary>
+            A queue of tasks that are waiting on semaphore.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.AsyncSemaphore.currentCount">
+            <summary>
+            Currently available "slots" within critical section.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AsyncSemaphore.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.AsyncSemaphore"/> class.
+            </summary>
+            <param name="count">A number of tasks simultaneously allowed into critical section.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="count"/> is negative.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AsyncSemaphore.WaitAsync">
+            <summary>
+            If awaited, blocks caller if there are too many tasks already in critical section, otherwise
+            returns immediately.
+            </summary>
+            <returns>Task to be awaited.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.AsyncSemaphore.Release">
+            <summary>
+            Releases semaphore and allows to continue next task in a queue.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.Constants">
+            <summary>
+            Static class with all constants used in BelkaCloudDownloader.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Constants.DownloadThreadsCount">
+            <summary>
+            How many threads shall be used to simultaneously make requests to Google services.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Constants.TaskChunkSize">
+            <summary>
+            How many tasks are allowed to be launched on one batch. This is needed because if several thousand tasks will be started simultaneously,
+            they will be cancelled forever even if they are waiting on semaphore (every cancelled task throws TaskCancellationException and it kills performance).
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Constants.ApplicationName">
+            <summary>
+            Application name, used to identify application for Google APIs.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.EstimationChangedEventArgs">
+            <summary>
+            Event arguments for EstimationChanged signal. Reports a number of work units to do.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.EstimationChangedEventArgs.#ctor(BelkaCloudDownloader.Utils.AbstractTask,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.EstimationChangedEventArgs"/> class.
+            </summary>
+            <param name="task">Task for which estimation has changed.</param>
+            <param name="estimation">Current estimation (measured in abstract work units).</param>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.EstimationChangedEventArgs.Estimation">
+            <summary>
+            Gets current estimation of a task (measured in abstract work units).
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.EstimationChangedEventArgs.Task">
+            <summary>
+            Gets task for which estimation is changed.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.PreliminaryResultsReadyEventArgs">
+            <summary>
+            Event arguments for PreliminaryResultsReady signal.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.PreliminaryResultsReadyEventArgs.#ctor(System.Object)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.PreliminaryResultsReadyEventArgs"/> class.
+            </summary>
+            <param name="results">Preliminary results from an operation.</param>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.PreliminaryResultsReadyEventArgs.Results">
+            <summary>
+            Gets preliminary results from an operation.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.ProgressChangedEventArgs">
+            <summary>
+            Event arguments for ProgressChanged signal. Reports a number of work units done.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.ProgressChangedEventArgs.#ctor(BelkaCloudDownloader.Utils.AbstractTask,System.String,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.ProgressChangedEventArgs"/> class.
+            </summary>
+            <param name="task">Task which progress has changed.</param>
+            <param name="info">Current operation user-readable description.</param>
+            <param name="progress">Current operation progress.</param>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.ProgressChangedEventArgs.Task">
+            <summary>
+            Gets identifier or information about operation being executed, to allow to report progress of multiple
+            simultaneous operations, like downloading multiple files in parallel.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.ProgressChangedEventArgs.Info">
+            <summary>
+            Gets current operation user-readable description.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.ProgressChangedEventArgs.Progress">
+            <summary>
+            Gets current operation progress.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.StatusChangedEventArgs">
+            <summary>
+            Event arguments for StatusChanged signal.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.StatusChangedEventArgs.#ctor(BelkaCloudDownloader.Utils.Status)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.StatusChangedEventArgs"/> class.
+            </summary>
+            <param name="status">Current status of the operation.</param>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.StatusChangedEventArgs.Status">
+            <summary>
+            Gets current status of the operation.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.InternalErrorException">
+            <summary>
+            General internal error exception, thrown when something is wrong with internal data structures.
+            Doesn't mean to be catched.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.InternalErrorException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.InternalErrorException"/> class.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.InternalErrorException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.InternalErrorException"/> class.
+            </summary>
+            <param name="message">Error message.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.InternalErrorException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.InternalErrorException"/> class.
+            </summary>
+            <param name="message">Error message.</param>
+            <param name="innerException">Inner exception.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.InternalErrorException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.InternalErrorException"/> class.
+            </summary>
+            <param name="info">Serialization info.</param>
+            <param name="context">Streaming context.</param>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.FileUtils">
+            <summary>
+            Contains useful methods for working with file system.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.FileUtils.SanitizeFileName(System.String)">
+            <summary>
+            By given file name makes file name correct with respect to underlying local file system.
+            </summary>
+            <param name="fileName">File name to normalize.</param>
+            <returns>Normalized file name.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.FileUtils.SanitizePath(System.String)">
+            <summary>
+            By given folder path makes it correct with respect to underlying local file system.
+            </summary>
+            <param name="path">Path to normalize.</param>
+            <returns>Normalized file name.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.Status">
+            <summary>
+            Enumeration with possible operation states that can be reported by downloader.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.Initialized">
+            <summary>
+            Initial status of a downloader.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.Authenticating">
+            <summary>
+            Authentication with server.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.DownloadingMetaInformation">
+            <summary>
+            Downloading meta-information about user account and files.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.ListingFiles">
+            <summary>
+            Listing files, receiving meta-information about each one without actually downloading it.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.DownloadingFiles">
+            <summary>
+            Downloading files.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.DownloadingAccountInfo">
+            <summary>
+            Downloading general account information.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.DownloadingGeolocationData">
+            <summary>
+            Downloading available geo-location data.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.DownloadingCalendar">
+            <summary>
+            Downloading calendar events.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.Done">
+            <summary>
+            Successfully finished.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.Status.Error">
+            <summary>
+            Finished with error.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.DownloaderTask`2">
+            <summary>
+            Abstract task that has template method for task execution. Updates <see cref="T:BelkaCloudDownloader.Utils.TaskStatusAccumulator"/> object
+            - sets FailureOccurred if task returned null, or SuccessItem if result is not null. Descendants are expected
+            to return null on non-critical errors or throw exceptions otherwise.
+            </summary>
+            <typeparam name="TInput">Input data type of a task.</typeparam>
+            <typeparam name="TOutput">Output data type of a task.</typeparam>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.DownloaderTask`2.Run(`0)">
+            <summary>
+            Executes task asynchronously, reports progress and logs activity.
+            </summary>
+            <param name="data">Input data for a task.</param>
+            <returns>Output data of a task, null if task is failed.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.DownloaderTask`2.DoRun(`0)">
+            <summary>
+            Abstract method that shall be overridden in descendants to actually do work.
+            </summary>
+            <param name="data">Input data for a task.</param>
+            <returns>Output data of a task, null if task is failed.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.TaskStatusAccumulator">
+             <summary>
+             A helper class for setting a proper state for the task
+             </summary>
+             The logic is following:
+             - If some error occurres and nothing has been extracted, the status should be Failure
+             - If some error occurres but some information was successfully extracted, the status should be Errors
+             - If no error occurred, the status should be success, no matter whether some info was extracted or not.
+            
+             So, during the process we just call SuccessItem and FailureOccurred methods on corresponding events
+             and at the end of the process we can take the total status from the TaskStatus property.
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskStatusAccumulator.Reset">
+            <summary>
+            Resets the accumulator to initial state at the srart of the process
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskStatusAccumulator.SuccessItem">
+            <summary>
+            Informs the accumulator that some info has been successfully extracted
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskStatusAccumulator.FailureOccurred">
+            <summary>
+            Informs the accumulator that an error occurred
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.TaskStatusAccumulator.Status">
+            <summary>
+            Reports the final status
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.DownloaderTask`1">
+            <summary>
+            Abstract task that has template method for task execution. Updates <see cref="T:BelkaCloudDownloader.Utils.TaskStatusAccumulator"/> object
+            - sets FailureOccurred if task returned null, or SuccessItem if result is not null. Descendants are expected
+            to return null on non-critical errors or throw exceptions otherwise. Has only output parameter, data on which
+            task works shall be passed in constructor.
+            </summary>
+            <typeparam name="TOutput">Output data type of a task.</typeparam>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.DownloaderTask`1.Run">
+            <summary>
+            Executes task asynchronously, reports progress and logs activity.
+            </summary>
+            <returns>Output data of a task, null if task is failed.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.DownloaderTask`1.DoRun">
+            <summary>
+            Abstract method that shall be overridden in descendants to actually do work.
+            </summary>
+            <returns>Output data of a task, null if task is failed.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.ITask`2">
+            <summary>
+            Interface that shall be implemented by a downloader task to actually download something from a cloud service.
+            </summary>
+            <typeparam name="TInput">Type of input data for downloading process, like user credentials
+                or drive service.</typeparam>
+            <typeparam name="TOutput">Type of output data of a task, usually it is downloaded data.</typeparam>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.ITask`2.Run(`0,BelkaCloudDownloader.Utils.ITaskContext)">
+            <summary>
+            Run a task. It shall initiate downloading process and return awaitable <see cref="T:System.Threading.Tasks.Task"/> object. Shall be
+            implemented as cancellable asynchronous operation. Shall use objects from context --- log to a supplied
+            logger object, respect cancellation token.
+            </summary>
+            <param name="data">Input data for downloading process, like user credentials or drive service.</param>
+            <param name="context">Provides context for task execution, like logger object and cancellation token.
+                </param>
+            <returns>Awaitable <see cref="T:System.Threading.Tasks.Task"/> object with downloaded data.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.ITaskContext">
+            <summary>
+            External context for downloader task execution. Provides logger, cancellation token and some utility functions
+            to a task, hiding underlying complexity of tasks engine.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.ITaskContext.Log">
+            <summary>
+            Gets logger object that shall be used by a task to log debug information.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.ITaskContext.CancellationToken">
+            <summary>
+            Gets cancellation token that task shall check to be able to be cancelled.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.ITaskContext.Fail(System.String,System.Exception)">
+            <summary>
+            Marks task status as failed, writing error message to a log.
+            </summary>
+            <param name="message">Message with details about error that caused a task to fail.</param>
+            <param name="cause">Exception (if present) that caused a task to fail.</param>
+        </member>
+        <member name="T:BelkaCloudDownloader.Utils.TaskContainer">
+            <summary>
+            Represents a set of tasks bundled together and able to report estimation and progress as one task (as sum of
+            estimations and progresses of underlying tasks). Can not run tasks itself, so tasks shall be registered here
+            and then run manually (it allows better control over execution flow).
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.TaskContainer.childTasks">
+            <summary>
+            A list of underlying tasks.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.TaskContainer.guessEstimation">
+            <summary>
+            Guess estimation of a task (based not on subtasks estimations, but on apriori knowledge).
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Utils.TaskContainer.estimationIsFinal">
+            <summary>
+            Flag indicating that all subtasks estimations are actual and we shall not rely on guess estimation anymore.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.#ctor(System.Threading.CancellationToken,BelkaCloudDownloader.Utils.TaskStatusAccumulator,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Utils.TaskContainer"/> class.
+            </summary>
+            <param name="cancellationToken">Token that is used to cancel tasks.</param>
+            <param name="statusAccumulator">Task status accumulator object to track tasks success/failure status.
+            </param>
+            <param name="guessEstimation">Starting apriori estimation. Will be updated automatically if it becomes
+            clear that there is more work to be done than estimated.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.AddTask(BelkaCloudDownloader.Utils.AbstractTask)">
+            <summary>
+            Registers a task as a child task in this container.
+            </summary>
+            <param name="task">A task to register as a subtask.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.Reestimate">
+            <summary>
+            Recalculates estimation based on current estimations of child tasks. Supposed to be called when all
+            information about remaining work is known and guess estimation becomes obsolete.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.Clear">
+            <summary>
+            Removes all tasks and resets status.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.SetGuessEstimation(System.Int32)">
+            <summary>
+            Sets guess estimation for a task container.
+            </summary>
+            <param name="estimation">Guess estimation in abstract work units.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.UpdateLog(BelkaCloudDownloader.Utils.IIoLogger)">
+            <inheritdoc />
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.OnEstimationChanged(System.Object,BelkaCloudDownloader.Utils.EstimationChangedEventArgs)">
+            <summary>
+            Handler for EstimationChanged event from one of subtasks.
+            </summary>
+            <param name="sender">Task that sent the event.</param>
+            <param name="args">Event arguments.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.OnProgressChanged(System.Object,BelkaCloudDownloader.Utils.ProgressChangedEventArgs)">
+            <summary>
+            Handler for ProgressChanged event from one of subtasks.
+            </summary>
+            <param name="sender">Task that sent the event.</param>
+            <param name="args">Event arguments.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.UpdateEstimation">
+            <summary>
+            Updates current estimation based on estimation of subtasks. If sum of subtasks estimations is less than
+            guess estimation and Reestimate was not called, guess estimation is used.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.Estimate">
+            <summary>
+            Returns current sum of estimations of subtasks.
+            </summary>
+            <returns>Current sum of estimations of subtasks.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContainer.GetProgress">
+            <summary>
+            Returns current sum of progresses of subtasks.
+            </summary>
+            <returns>Current sum of progresses of subtasks.</returns>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.TaskContext.Log">
+            <inheritdoc/>
+        </member>
+        <member name="P:BelkaCloudDownloader.Utils.TaskContext.CancellationToken">
+            <inheritdoc/>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskContext.Fail(System.String,System.Exception)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BelkaCloudDownloader.Utils.TaskWrapper`2.DoRun(`0)">
+            <summary>
+            Executes an underlying task.
+            </summary>
+            <param name="data">Input data for a task.</param>
+            <returns>Output data of a task, null if task is failed.</returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BelkaCloudDownloader.Google</name>
+    </assembly>
+    <members>
+        <member name="T:BelkaCloudDownloader.Google.Drive.DownloadedFile">
+            <summary>
+            Represents a file that was successfully downloaded from Google Drive.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.DownloadedFile.#ctor(Google.Apis.Drive.v3.Data.File,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.DownloadedFile"/> class.
+            </summary>
+            <param name="metaInformation">Metainformation about file as it was returned by Google server.</param>
+            <param name="path">A path to a downloaded file on a local file system.</param>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.DownloadedFile.MetaInformation">
+            <summary>
+            Gets metainformation about file as it was returned by Google server.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.DownloadedFile.Path">
+            <summary>
+            Gets a path to a downloaded file on a local file system.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.MetaInformation">
+            <summary>
+            Container with meta information about Google Drive user account and files. Uses Google Drive API classes as data model.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.MetaInformation.#ctor(Google.Apis.Drive.v3.Data.About,System.Collections.Generic.ICollection{Google.Apis.Drive.v3.Data.File})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.MetaInformation"/> class.
+            </summary>
+            <param name="about">Information about user account.</param>
+            <param name="files">Collection with meta-information about files on Google Drive.</param>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.MetaInformation.About">
+            <summary>
+            Gets information about user account.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.MetaInformation.Files">
+            <summary>
+            Gets collection of files on Google Drive.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.MetaInformation.DownloadedFiles">
+            <summary>
+            Gets or sets collection of files actually downloaded and stored in local file system.
+            It is initialized after <see cref="T:BelkaCloudDownloader.Google.Drive.MetaInformation"/> object is created, since metainformation
+            is downloaded first, then files.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.BinaryFileDownloader">
+            <summary>
+            Downloads binary (non-"Google Docs") file.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.BinaryFileDownloader.#ctor(System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.BinaryFileDownloader"/> class.
+            </summary>
+            <param name="cancellationToken">Token that can be used to abort downloading.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.BinaryFileDownloader.DownloadBinaryFile(Google.Apis.Drive.v3.DriveService,Google.Apis.Drive.v3.Data.File,BelkaCloudDownloader.Utils.AsyncSemaphore,System.Int32,System.Collections.Generic.IDictionary{Google.Apis.Drive.v3.Data.File,System.Collections.Generic.IEnumerable{System.IO.DirectoryInfo}})">
+            <summary>
+            Downloads binary (non-"Google Docs") file.
+            </summary>
+            <param name="service">Google Drive service used to download a file.</param>
+            <param name="file">Meta-information about file to download.</param>
+            <param name="semaphore">Semaphore used to throttle downloading process.</param>
+            <param name="unitsOfWork">Abstract units of work assigned to download this file. Used in progress reporting.</param>
+            <param name="directories">Dictionary that contains possible directories to save a file.</param>
+            <returns>Information about downloaded file, null if downloading failed.</returns>
+            <exception cref="T:BelkaCloudDownloader.Utils.InternalErrorException">Something is wrong with downloader code itself.</exception>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask">
+            <summary>
+            Downloads Google Docs file.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask.exportFormats">
+            <summary>
+            Dictionary with possible export formats for Google Docs files.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask.semaphore">
+            <summary>
+            Semaphore used to throttle downloading.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask.directories">
+            <summary>
+            Dictionary that contains possible directories to save a file.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask.service">
+            <summary>
+            Google Drive service used to download a file.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask.#ctor(System.Collections.Generic.IDictionary{System.String,System.Collections.Generic.IList{System.String}},BelkaCloudDownloader.Utils.AsyncSemaphore,System.Collections.Generic.IDictionary{Google.Apis.Drive.v3.Data.File,System.Collections.Generic.IEnumerable{System.IO.DirectoryInfo}},Google.Apis.Drive.v3.DriveService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask"/> class.
+            </summary>
+            <param name="exportFormats">A dictionary with possible export formats for Google Docs files, shall be received from Google Drive.</param>
+            <param name="semaphore">Semaphore used to throttle downloading.</param>
+            <param name="directories">Dictionary that contains possible directories to save a file.</param>
+            <param name="service">Google Drive service used to download a file.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.DownloadGoogleDocsFileTask.Run(Google.Apis.Drive.v3.Data.File,BelkaCloudDownloader.Utils.ITaskContext)">
+            <summary>
+            Downloads Google Docs file.
+            </summary>
+            <param name="file">Meta-information about file to download.</param>
+            <param name="context">Provides context for task execution, like logger object and
+                cancellation token.</param>
+            <returns>An information about downloaded file.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.FileDownloadUtils">
+            <summary>
+            Static class containing useful file utilities.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FileDownloadUtils.GetFileName(Google.Apis.Drive.v3.Data.File,System.Collections.Generic.IDictionary{Google.Apis.Drive.v3.Data.File,System.Collections.Generic.IEnumerable{System.IO.DirectoryInfo}})">
+            <summary>
+            By given file and a dictionary of directories returns file name on a local file system where this file shall be stored
+            (without extension for Google Docs files and with extension for binary files).
+            </summary>
+            <param name="file">A file for which we want full local file name.</param>
+            <param name="directories">A dictionary that maps file to a list of directories where it can be stored.</param>
+            <returns>Full file name (with path) of a file in local file system.</returns>
+            <exception cref="T:BelkaCloudDownloader.Utils.InternalErrorException">Internal error, trying to save a file without directory info.</exception>
+            <exception cref="T:System.Security.SecurityException">The caller does not have the required permission. </exception>
+            <exception cref="T:System.IO.PathTooLongException">The fully qualified path and file name is 260 or more characters.</exception>
+            <exception cref="T:System.ArgumentException">File path contains one or more of the invalid characters.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FileDownloadUtils.CorrectFileTimes(Google.Apis.Drive.v3.Data.File,System.String)">
+            <summary>
+            Correct creation, modification and access times for a file in local file system to match corresponding values from cloud.
+            </summary>
+            <param name="file">Meta-information about file from cloud.</param>
+            <param name="fileName">Local file name.</param>
+            <returns>File info with correct time settings.</returns>
+            <exception cref="T:System.Security.SecurityException">The caller does not have the required permission. </exception>
+            <exception cref="T:System.UnauthorizedAccessException">Access to <paramref name="fileName" /> is denied. </exception>
+            <exception cref="T:System.IO.IOException"> General I/O exception when trying to modify file times.</exception>
+            <exception cref="T:System.IO.DirectoryNotFoundException">The specified path is invalid; for example, it is on
+                    an unmapped drive.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">The current operating system is not Windows NT or later.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The caller attempts to set an invalid creation time.</exception>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.GetAboutTask">
+            <summary>
+            Downloads information about user and account.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.GetAboutTask.Run(Google.Apis.Drive.v3.DriveService,BelkaCloudDownloader.Utils.ITaskContext)">
+            <summary>
+            Downloads information about user and account.
+            </summary>
+            <param name="service">Google Drive service used to download about info.</param>
+            <param name="taskContext">Provides context for task execution, like logger object and
+                cancellation token.</param>
+            <returns>Information about user and account.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.FilesDownloader">
+            <summary>
+            Downloads binary and Google Docs files from Google Drive and stores them into target directory.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.FilesDownloader.service">
+            <summary>
+            Google Drive service that is used to download files or meta-information.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.FilesDownloader.targetDir">
+            <summary>
+            Directory where we shall store downloaded files.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesDownloader.#ctor(Google.Apis.Drive.v3.DriveService,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.FilesDownloader"/> class.
+            </summary>
+            <param name="service">Google Drive service that is used to download files or meta-information.</param>
+            <param name="targetDir">Directory where we shall store downloaded files.</param>
+            <param name="cancellationToken">Token that can be used to abort downloading.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesDownloader.DownloadFiles(System.Collections.Generic.IEnumerable{Google.Apis.Drive.v3.Data.File},System.Collections.Generic.IDictionary{System.String,System.Collections.Generic.IList{System.String}})">
+            <summary>
+            Downloads files.
+            </summary>
+            <param name="files">Meta-information about files to download.</param>
+            <param name="exportFormats">A dictionary with possible export formats for Google Docs files, shall be
+            received from Google Drive.</param>
+            <returns>A list of info objects about downloaded files.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesDownloader.CreateDirectoryStructure(System.Collections.Generic.IEnumerable{Google.Apis.Drive.v3.Data.File},System.String)">
+            <summary>
+            Creates all directories needed to store files.
+            </summary>
+            <param name="files">A list with files meta-information.</param>
+            <param name="targetDirectory">Root directory where to store downloaded files.</param>
+            <returns>A dictionary that for each file contains a list of directories where it can be stored.</returns>
+            <exception cref="T:System.IO.IOException">The directory cannot be created. </exception>
+            <exception cref="T:System.Security.SecurityException">The caller does not have the required permission. </exception>
+            <exception cref="T:System.ArgumentException">File path contains invalid characters such as ", &lt;, &gt;, or |. </exception>
+            <exception cref="T:System.IO.PathTooLongException">The specified path, file name, or both exceed the system-defined maximum length.
+                    For example, on Windows-based platforms, paths must be less than 248 characters, and file names must be less than 260 characters.
+                    The specified path, file name, or both are too long.</exception>
+            <exception cref="T:System.IO.DirectoryNotFoundException">The specified path is invalid, such as being on an unmapped drive.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesDownloader.GetPaths(Google.Apis.Drive.v3.Data.File,System.Collections.Generic.IDictionary{System.String,Google.Apis.Drive.v3.Data.File})">
+            <summary>
+            Returns full paths where given file can be stored.
+            </summary>
+            <param name="file">A file for which we want to get paths.</param>
+            <param name="files">A dictionary that maps file id to a file.</param>
+            <returns>A list of possible paths for a given file.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.FilesInfoDownloader">
+            <summary>
+            Downloads metainformation about files.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesInfoDownloader.#ctor(System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.FilesInfoDownloader"/> class.
+            </summary>
+            <param name="cancellationToken">Cancellation token that allows to cancel an operation.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesInfoDownloader.GetFilesInfo(Google.Apis.Drive.v3.DriveService)">
+            <summary>
+            Downloads meta-information about files.
+            </summary>
+            <param name="service">Google Drive service that is used to download files metainformation.</param>
+            <returns>A list of meta-information for all files on drive.</returns>
+            <exception cref="T:System.OperationCanceledException">The token has had cancellation requested.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.FilesInfoDownloader.DownloadFileMetaInformation(Google.Apis.Drive.v3.DriveService,Google.Apis.Drive.v3.Data.File,BelkaCloudDownloader.Utils.AsyncSemaphore)">
+            <summary>
+            Asynchronously downloads meta-information for one file.
+            </summary>
+            <param name="service">Google Drive service that is used to download files metainformation.</param>
+            <param name="file">File with filled Id field.</param>
+            <param name="semaphore">Semaphore used to throttle downloading process.</param>
+            <returns>Asynchronous task that downloads meta-information.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.DriveDownloaderSettings">
+            <summary>
+            Google Drive downloader settings.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.DriveDownloaderSettings.RefreshToken">
+            <summary>
+            Gets or sets valid and non-expired Refresh Token from Google Drive Sync.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.DriveDownloaderSettings.TargetDirectory">
+            <summary>
+            Gets or sets directory where we shall store downloaded files.
+            </summary>
+        </member>
+        <member name="P:BelkaCloudDownloader.Google.Drive.DriveDownloaderSettings.DoDownloadFiles">
+            <summary>
+            Gets or sets a value indicating whether to download files from cloud or only meta-information.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.GoogleDriveDownloader">
+            <summary>
+            Main class that downloads files and meta-information from Google Drive.
+            It uses Google Drive Sync client id and secret to obtain access token by given refresh token.
+            Downloading process can be cancelled by cancellationToken and reports overall progress
+            (by ProgressChanged event) in a range of [0..100].
+            It also reports progress for a currently downloaded file, current status and when meta-information is ready.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.GoogleDriveDownloader.#ctor(System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.GoogleDriveDownloader"/> class.
+            </summary>
+            <param name="cancellationToken">Token by which downloading progress can be cancelled.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.GoogleDriveDownloader.AuthenticateManually(System.Threading.CancellationToken,BelkaCloudDownloader.Utils.IIoLogger)">
+            <summary>
+            Authenticates a client using browser consent form, may require login and password for Google account.
+            </summary>
+            <param name="cancellationToken">Token that allows to cancel authentication task.</param>
+            <param name="log">Logger object used to output debug info.</param>
+            <returns>Refresh token.</returns>
+            <exception cref="T:System.OperationCanceledException">Operation was cancelled by user.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.GoogleDriveDownloader.Download(BelkaCloudDownloader.Google.Drive.DriveDownloaderSettings)">
+            <summary>
+            Downloads meta-information and files from Google Drive.
+            </summary>
+            <param name="settings">Object with parameters of a downloader.</param>
+            <returns>Object with downloaded meta-information.</returns>
+            <exception cref="T:System.OperationCanceledException">The token has had cancellation requested.</exception>
+            <exception cref="T:System.ObjectDisposedException">The associated
+            <see cref="T:System.Threading.CancellationTokenSource" /> has been disposed.</exception>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.GoogleDriveDownloader.CreateService(System.String)">
+            <summary>
+            Creates Google Drive service object with correct credentials.
+            </summary>
+            <param name="refreshToken">Refresh Token to use.</param>
+            <returns>Google Drive service object.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.MetaInformationDownloader">
+            <summary>
+            Downloads meta-information about Google Docs files.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.MetaInformationDownloader.service">
+            <summary>
+            Google Drive service that is used to download files or meta-information.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.MetaInformationDownloader.#ctor(System.Threading.CancellationToken,Google.Apis.Drive.v3.DriveService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BelkaCloudDownloader.Google.Drive.MetaInformationDownloader"/> class.
+            </summary>
+            <param name="cancellationToken">Token that can be used to abort downloading.</param>
+            <param name="service">Google Drive service that is used to download files or meta-information.</param>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.Drive.MetaInformationDownloader.DownloadMetaInformation">
+            <summary>
+            Downloads meta-information about user account and files from Google Drive.
+            </summary>
+            <returns>Meta-information container.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.Drive.Constants">
+            <summary>
+            Static class with all constants used by Google Drive downloader.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.Constants.GoogleDriveSyncClientId">
+            <summary>
+            Id of our client registered to test account, which login and password is distributed
+            on a need-to-know basis.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.Constants.GoogleDriveSyncClientSecret">
+            <summary>
+            Secret of our client.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.Drive.Constants.GoogleDocsFileSize">
+            <summary>
+            We do not know a size for Google Docs file prior to export so we use just random (but naturally looking)
+            value here. Progress report will be inaccurate for such files.
+            </summary>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.DummyDataStore">
+            <summary>
+            Implementation of Google IDataStore interace that does not actually store anything, so user shall
+            re-authenticate every time. It is actually desired behavior in forensics when there are multiple accounts
+            to download and common authentication scenario includes refresh token that does not need authentication.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.DummyDataStore.StoreAsync``1(System.String,``0)">
+            <summary>Does not store anything, so returns task that does nothing.</summary>
+            <typeparam name="T">The type to store in the data store.</typeparam>
+            <param name="key">The key.</param>
+            <param name="value">The value to store.</param>
+            <returns>An empty <see cref="T:System.Threading.Tasks.Task"/> object.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.DummyDataStore.DeleteAsync``1(System.String)">
+            <summary>
+            Does nothing since nothing was stored there.
+            </summary>
+            <typeparam name="T">The type to delete from the data store.</typeparam>
+            <param name="key">The key to delete.</param>
+            <returns>An empty <see cref="T:System.Threading.Tasks.Task"/> object.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.DummyDataStore.GetAsync``1(System.String)">
+            <summary>Returns <c>null</c> for every key.</summary>
+            <typeparam name="T">The type to retrieve from the data store.</typeparam>
+            <param name="key">The key to retrieve its value.</param>
+            <returns>Task which returns <c>null</c>.</returns>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.DummyDataStore.ClearAsync">
+            <summary>Does nothing since nothing was stored here.</summary>
+            <returns>An empty <see cref="T:System.Threading.Tasks.Task"/> object.</returns>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.GoogleRequestHelper">
+            <summary>
+            Utility methods for async requests to Google API.
+            TODO: It actually shall be thread-safe non-static class that keeps queue of requests for given Google API and can throttle their execution.
+            </summary>
+        </member>
+        <member name="F:BelkaCloudDownloader.Google.GoogleRequestHelper.Cooldown">
+            <summary>
+            Different Google services have different request quotas, but 210 ms will be good as cooldown even for Google Plus with
+            500 requests for 100 s quota.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.GoogleRequestHelper.Execute``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken,System.Int32)">
+            <summary>
+            Executes given asynchronous task and waits some time after so that total amount of time spent will be no less than
+            specified cooldown. Useful to fulfill server requirements like "no more than one request in a second". Task execution and
+            waiting are cancellable. Does not provide accurate resolution, up to 25 ms "misses" are possible. Uses exponential backoff
+            in case of API error.
+            </summary>
+            <typeparam name="TOutput">Type of result of a task.</typeparam>
+            <param name="task">A task to be executed. Must take <see cref="T:System.Threading.CancellationToken"/> to be able to be cancelled.</param>
+            <param name="token">Cancellation token allowing to cancel an operation or cooldown.</param>
+            <param name="cooldown">Cooldown of an operation in milliseconds.</param>
+            <returns>Output of a task.</returns>
+            <exception cref="T:BelkaCloudDownloader.Utils.InternalErrorException">Exponential backoff failed to throw exception after last attempt.</exception>
+            <exception cref="T:Google.GoogleApiException">There is unrecoverable error during communication with remote server.</exception>
+        </member>
+        <member name="T:BelkaCloudDownloader.Google.ManualAuthenticator">
+            <summary>
+            Helper class that provides consent screen authentication for Google services.
+            </summary>
+        </member>
+        <member name="M:BelkaCloudDownloader.Google.ManualAuthenticator.AuthenticateManually(System.Threading.CancellationToken,Google.Apis.Auth.OAuth2.ClientSecrets,System.Collections.Generic.IEnumerable{System.String},BelkaCloudDownloader.Utils.IIoLogger,System.String)">
+            <summary>
+            Authenticates a client using browser consent form, may require login and password for Google account.
+            </summary>
+            <param name="cancellationToken">Token that allows to cancel authentication task.</param>
+            <param name="secrets">A set of client secrets to use when authenticating.</param>
+            <param name="scopes">A set of capabilities to request from Google services.</param>
+            <param name="log">Logger that accepts debug info.</param>
+            <param name="dataStoreName">Name of a file data store to use to store credentials.</param>
+            <returns>Refresh token.</returns>
+            <exception cref="T:System.OperationCanceledException">Operation was cancelled by user.</exception>
+        </member>
+    </members>
+</doc>
