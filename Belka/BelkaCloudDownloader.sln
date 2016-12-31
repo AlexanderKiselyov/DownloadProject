@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BelkaCloudDownloader.Utils.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BelkaCloudDownloader.Google", "BelkaCloudDownloader.Google\BelkaCloudDownloader.Google.csproj", "{16196149-0BB9-4AFE-91FF-846A08B553BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BelkaCloudDownloader.Dropbox", "..\BelkaSoft\DropboxCloudDownloader\BelkaCloudDownloader.Dropbox.csproj", "{51AA2A73-ABE3-411D-9404-F63828E4192A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BelkaCloudDownloader.Dropbox", "BelkaCloudDownloader.Dropbox\BelkaCloudDownloader.Dropbox.csproj", "{51AA2A73-ABE3-411D-9404-F63828E4192A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
